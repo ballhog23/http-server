@@ -12,11 +12,12 @@ const app = express();
 
 // middleware
 app.use(middlewareLogResponses);
-app.use('/app', middlewareFileServerHits, express.static("./src/app"))
+app.use('/app', middlewareFileServerHits, express.static("./src/app"));
 
 // routes
-app.get('/api/reset', resetHandler)
-app.get('/api/metrics', metricsHandler)
 app.get('/api/healthz', handlerReadiness)
+app.get('/admin/reset', resetHandler)
+app.get('/admin/metrics', metricsHandler)
 
-app.listen(PORT, () => console.log(`🚀 server running on http://localhost:${PORT}/app/`))
+// server
+app.listen(PORT, () => console.log(`🚀 app running at http://localhost:${PORT}/app/`))
