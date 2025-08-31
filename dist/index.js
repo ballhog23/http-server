@@ -12,7 +12,7 @@ const app = express();
 app.use(middlewareLogResponses);
 app.use('/app', middlewareFileServerHits, express.static("./src/app"));
 // routes
-app.get('/reset', resetHandler);
-app.get('/metrics', metricsHandler);
-app.get('/healthz', handlerReadiness);
+app.get('/api/reset', resetHandler);
+app.get('/api/metrics', metricsHandler);
+app.get('/api/healthz', handlerReadiness);
 app.listen(PORT, () => console.log(`🚀 server running on http://localhost:${PORT}/app/`));
