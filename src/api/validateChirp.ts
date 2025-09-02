@@ -1,36 +1,31 @@
 import type { Request, Response } from 'express';
-import { respondWithJSON, respondWithError } from './json.js';
-
+import { respondWithJSON } from './json.js';
+import { BadRequestError } from './classes/statusErrors.js'
 
 export const handlerValidateChirp = async (req: Request, res: Response) => {
     type Parameters = {
-        body: string
+        body: string;
     }
 
-    let body = '';
+    const params: Parameters = req.body;
+    const bodyLength = params.body.length;
+    const maxChirpLength = 140;
+    const regexFilterWords = ['kerfuffle', 'sharbert', 'fornax'];
 
-    req.on('data', (chunk) => {
-        body += chunk;
-        console.log(`Received ${chunk.length} bytes of data.`);
-    })
+    if (bodyLength > maxChirpLength) {
+        throw new BadRequestError(`Chirp is too long. Max length is ${maxChirpLength}`);
+    } else {
+        const dirtyBody: string[] = params.body.split(' ');
 
-    let params: Parameters;
+        for (let i = 0; i < dirtyBody.length; i++) {
+            let lowerCurrentWord = dirtyBody[i].toLowerCase();
 
-    req.on('end', () => {
-        try {
-            params = JSON.parse(body);
-        } catch (error) {
-            respondWithError(res, 400, 'Invalid JSON');
-            return;
+            if (regexFilterWords.includes(lowerCurrentWord)) {
+                dirtyBody[i] = '****';
+            }
         }
 
-        const maxChirpChars = 140;
-
-        if (params.body.length > maxChirpChars) {
-            respondWithError(res, 400, 'Chirp is too long');
-            return;
-        }
-
-        respondWithJSON(res, 200, { valid: true })
-    })
+        const cleanedBody = dirtyBody.join(' ')
+        respondWithJSON(res, 200, { "cleanedBody": cleanedBody })
+    }
 }
