@@ -6,8 +6,8 @@ import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
 import { handlerValidateChirp } from './api/validateChirp.js';
 import { resetHandler } from './api/reset.js';
-import dotenv from 'dotenv';
-dotenv.config();
+
+process.loadEnvFile();
 
 const PORT = process.env.PORT || 8080;
 const app = express();
