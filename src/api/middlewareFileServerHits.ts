@@ -3,6 +3,6 @@ import { config } from '../config.js';
 
 export const middlewareFileServerHits = (req: Request, __: Response, next: NextFunction) => {
     console.log('requesting URL: ', req.url)
-    config.fileServerHits++;
+    config.api.fileServerHits++;
     next();
 }
