@@ -9,6 +9,7 @@ import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
 import { handlerValidateChirp } from './api/validateChirp.js';
 import { resetHandler } from './api/reset.js';
+import { insertUserHandler } from './api/createUser.js';
 import { config } from './config.js';
 
 process.loadEnvFile();
@@ -30,6 +31,10 @@ app.get('/api/healthz', (req, res, next) => {
 
 app.post('/api/validate_chirp', (req, res, next) => {
     Promise.resolve(handlerValidateChirp(req, res)).catch(next)
+})
+
+app.post('/api/users', (req, res, next) => {
+    Promise.resolve(insertUserHandler(req, res)).catch(next)
 })
 
 app.get('/admin/metrics', (req, res, next) => {
