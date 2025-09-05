@@ -1,6 +1,6 @@
 import type { MigrationConfig } from "drizzle-orm/migrator";
-
 process.loadEnvFile();
+
 function envOrThrow(key: string) {
     const value = process.env[key];
     if (!value) {

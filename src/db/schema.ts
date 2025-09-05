@@ -21,4 +21,4 @@ export const chirps = pgTable("chirps", {
     user_id: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" })
 });
 
-export type Chirp = typeof chirps.$inferInsert;
+export type NewChirp = typeof chirps.$inferInsert;
