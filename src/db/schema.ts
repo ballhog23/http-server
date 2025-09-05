@@ -1,4 +1,4 @@
-import { pgTable, timestamp, varchar, uuid, text, integer } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, varchar, uuid, text } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -8,6 +8,7 @@ export const users = pgTable("users", {
         .defaultNow()
         .$onUpdate(() => new Date()),
     email: varchar("email", { length: 256 }).unique().notNull(),
+    hashed_password: varchar('hashed_password', { length: 256 }).notNull().default('unset')
 });
 
 

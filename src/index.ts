@@ -10,7 +10,8 @@ import { metricsHandler } from './api/metrics.js';
 import { handlerChirps } from './api/createChirp.js';
 import { handlerGetAllChirps, handlerGetSingleChirp } from './api/getChirps.js';
 import { resetHandler } from './api/reset.js';
-import { insertUserHandler } from './api/createUser.js';
+import { userHandler } from './api/users.js';
+import { loginHandler } from './api/auth.js';
 import { config } from './config.js';
 
 process.loadEnvFile();
@@ -43,7 +44,11 @@ app.get('/api/chirps/:chirpID', (req, res, next) => {
 })
 
 app.post('/api/users', (req, res, next) => {
-    Promise.resolve(insertUserHandler(req, res)).catch(next)
+    Promise.resolve(userHandler(req, res)).catch(next)
+})
+
+app.post('/api/login', (req, res, next) => {
+    Promise.resolve(loginHandler(req, res)).catch(next)
 })
 
 app.get('/admin/metrics', (req, res, next) => {
