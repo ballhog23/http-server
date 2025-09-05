@@ -13,12 +13,7 @@ export async function createChirp(chirp: NewChirp) {
 }
 
 export async function getAllChirps() {
-    const rows = await db
-        .select()
-        .from(chirps)
-        .orderBy(chirps.createdAt) // asc unless otherwise specified
-
-    return rows;
+    return db.select().from(chirps).orderBy(chirps.createdAt);
 }
 
 // export async function deleteAllChirps() {
