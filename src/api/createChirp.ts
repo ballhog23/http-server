@@ -16,18 +16,18 @@ export const handlerChirps = async (req: Request, res: Response) => {
     }
 
     const cleanedBody = validateChirp(params.body);
-    const chirp = await createChirp({ body: cleanedBody, user_id: params.userId });
+    const chirp = await createChirp({ body: cleanedBody, userId: params.userId });
 
     if (!chirp) throw new Error('Something went wrong creating chirp');
 
-    const { body, id, createdAt, updatedAt, user_id } = chirp;
+    const { body, id, createdAt, updatedAt, userId } = chirp;
 
     respondWithJSON(res, 201, {
         id: id,
         createdAt: createdAt,
         updatedAt: updatedAt,
         body: body,
-        userId: user_id
+        userId: userId
     })
 
 }

@@ -1,9 +1,9 @@
 import { Response, Request } from "express";
-import { UnauthorizedError } from "./classes/statusErrors.js";
+import { UserNotAuthenticatedError } from "./classes/statusErrors.js";
 import { respondWithJSON } from "./json.js";
 import { checkPasswordHash } from "../auth.js";
 import { getUserByEmail } from "../db/queries/users.js";
-import type { UserResponse } from '../db/queries/users.js'
+import type { UserResponse } from '../api/users.js';
 
 export async function loginHandler(req: Request, res: Response) {
     type Parameters = {
@@ -15,21 +15,16 @@ export async function loginHandler(req: Request, res: Response) {
 
     const user = await getUserByEmail(params.email);
 
-    if (!user) throw new UnauthorizedError('Incorrect email or password');
+    if (!user) throw new UserNotAuthenticatedError('Incorrect email or password');
 
-    const { hashed_password } = user;
+    const matching = await checkPasswordHash(params.password, user.hashedPassword);
 
-    const hashedPassword = await checkPasswordHash(params.password, hashed_password);
-
-    if (!hashedPassword) throw new UnauthorizedError('Incorrect email or password');
-
-    const { id, createdAt, updatedAt, email } = user;
+    if (!matching) throw new UserNotAuthenticatedError('Incorrect email or password');
 
     respondWithJSON(res, 200, {
-        id: id,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        email: email
+        id: user.id,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        email: user.email
     } satisfies UserResponse)
-
 }

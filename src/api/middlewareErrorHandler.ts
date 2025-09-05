@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { respondWithError } from './json.js';
-import { BadRequestError, UnauthorizedError, ForbiddenError, NotFoundError } from './classes/statusErrors.js'
+import { BadRequestError, UserForbiddenError, UserNotAuthenticatedError, NotFoundError } from './classes/statusErrors.js'
 
 export const errorHandler = (err: Error, _: Request, res: Response, __: NextFunction) => {
     let statusCode = 500;
@@ -10,11 +10,11 @@ export const errorHandler = (err: Error, _: Request, res: Response, __: NextFunc
         statusCode = 400;
         message = err.message;
 
-    } else if (err instanceof UnauthorizedError) {
+    } else if (err instanceof UserNotAuthenticatedError) {
         statusCode = 401;
         message = err.message;
 
-    } else if (err instanceof ForbiddenError) {
+    } else if (err instanceof UserForbiddenError) {
         statusCode = 403;
         message = err.message;
 
