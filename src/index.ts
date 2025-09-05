@@ -7,7 +7,7 @@ import { middlewareFileServerHits } from './api/middlewareFileServerHits.js';
 import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
-import { handlerValidateChirp } from './api/validateChirp.js';
+import { handlerChirps } from './api/createChirp.js';
 import { resetHandler } from './api/reset.js';
 import { insertUserHandler } from './api/createUser.js';
 import { config } from './config.js';
@@ -29,8 +29,8 @@ app.get('/api/healthz', (req, res, next) => {
    Promise.resolve(handlerReadiness(req, res)).catch(next);
 })
 
-app.post('/api/validate_chirp', (req, res, next) => {
-    Promise.resolve(handlerValidateChirp(req, res)).catch(next)
+app.post('/api/chirps', (req, res, next) => {
+    Promise.resolve(handlerChirps(req, res)).catch(next)
 })
 
 app.post('/api/users', (req, res, next) => {
@@ -45,9 +45,8 @@ app.post('/admin/reset', (req, res, next) => {
     Promise.resolve(resetHandler(req, res)).catch(next)
 })
 
-// call this after the fact to allow error handling in all routes
+// call this middleware after the fact to allow error handling in all routes
 app.use(errorHandler)
-
 
 // server
 app.listen(port, () => console.log(`🚀 app running at http://localhost:${port}/app/`))
