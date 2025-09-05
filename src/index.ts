@@ -8,6 +8,7 @@ import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
 import { handlerChirps } from './api/createChirp.js';
+import { handlerGetAllChirps } from './api/getChirps.js';
 import { resetHandler } from './api/reset.js';
 import { insertUserHandler } from './api/createUser.js';
 import { config } from './config.js';
@@ -26,11 +27,15 @@ app.use('/app', middlewareFileServerHits, express.static("./src/app"));
 
 // routes
 app.get('/api/healthz', (req, res, next) => {
-   Promise.resolve(handlerReadiness(req, res)).catch(next);
+    Promise.resolve(handlerReadiness(req, res)).catch(next);
 })
 
 app.post('/api/chirps', (req, res, next) => {
     Promise.resolve(handlerChirps(req, res)).catch(next)
+})
+
+app.get('/api/chirps', (req, res, next) => {
+    Promise.resolve(handlerGetAllChirps(req, res)).catch(next)
 })
 
 app.post('/api/users', (req, res, next) => {

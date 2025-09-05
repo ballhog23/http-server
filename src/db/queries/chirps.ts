@@ -12,6 +12,15 @@ export async function createChirp(chirp: NewChirp) {
     return rows;
 }
 
+export async function getAllChirps() {
+    const rows = await db
+        .select()
+        .from(chirps)
+        .orderBy(chirps.createdAt) // asc unless otherwise specified
+
+    return rows;
+}
+
 // export async function deleteAllChirps() {
 //     await db.delete(chirps);
 // }
