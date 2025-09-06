@@ -1,8 +1,7 @@
 import bcrypt from "bcrypt";
 import { JwtPayload } from "jsonwebtoken";
 import jwt from 'jsonwebtoken';
-import type { JsonWebTokenError } from "jsonwebtoken";
-import { UserNotAuthenticatedError } from "./api/classes/statusErrors";
+import { UserNotAuthenticatedError } from "./api/classes/statusErrors.js";
 
 const TOKEN_ISSUER = 'chirpy';
 

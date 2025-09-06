@@ -12,6 +12,7 @@ function envOrThrow(key: string) {
 type Config = {
     api: APIConfig;
     db: DBConfig;
+    jwt: JWTConfig;
 }
 
 type DBConfig = {
@@ -25,8 +26,14 @@ type APIConfig = {
     platform: string;
 }
 
+type JWTConfig = {
+    defaultDuration: number,
+    secret: string,
+    issuer: string,
+}
+
 const migrationConfig: MigrationConfig = {
-  migrationsFolder: "./src/db/migrations",
+    migrationsFolder: "./src/db/migrations",
 };
 
 export const config: Config = {
@@ -39,4 +46,9 @@ export const config: Config = {
         url: envOrThrow('DB_URL'),
         migrationConfig: migrationConfig,
     },
+    jwt: {
+        defaultDuration: 3600, // 1 hour
+        secret: envOrThrow('SECRET'),
+        issuer: 'chirpy'
+    }
 }

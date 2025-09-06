@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { makeJWT, validateJWT } from "./auth";
 import { hashPassword, checkPasswordHash } from "./auth.js";
 import { UserNotAuthenticatedError } from "./api/classes/statusErrors";
+import { config } from './config.js';
 
 // describe("Password Hashing", () => {
 //   const password1 = "correctPassword123!";
@@ -43,3 +44,34 @@ describe("JWT verification", () => {
         expect(() => validateJWT(validToken, wrongSecret)).toThrow(UserNotAuthenticatedError)
     })
 });
+
+describe('Bearer Token', () => {
+    const secret = config.secret;
+    let token: string | undefined;
+    let wrongToken: string | undefined;;
+    const stub = {
+        getBearerToken: (name: string | undefined) => {
+            if (name === 'Authorization') {
+                const length = 'Bearer'.length + 1;
+                const value = 'Bearer sdfds82h';
+                const key = value.slice(length)
+                return key;
+            }
+
+            return undefined;
+        }
+    }
+
+    beforeAll(async () => {
+        token = stub.getBearerToken('Authorization');
+        wrongToken = stub.getBearerToken('Farty')
+    })
+
+    it('should return the bearer token', () => {
+        expect(token).toBe('sdfds82h')
+    })
+
+    it('should return undefined if no Authorization header is present on http request', () => {
+        expect(wrongToken).toBe(undefined)
+    })
+})

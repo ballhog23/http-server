@@ -7,7 +7,7 @@ import { middlewareFileServerHits } from './api/middlewareFileServerHits.js';
 import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
-import { handlerChirps } from './api/createChirp.js';
+import { handlerChirps } from './api/chirps.js';
 import { handlerGetAllChirps, handlerGetSingleChirp } from './api/getChirps.js';
 import { resetHandler } from './api/reset.js';
 import { userHandler } from './api/users.js';
