@@ -1,25 +1,25 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { makeJWT, validateJWT } from "./auth";
 import { hashPassword, checkPasswordHash } from "./auth.js";
-import { UserNotAuthenticatedError } from "./api/classes/statusErrors";
-import { config } from './config.js';
+import { BadRequestError, UserNotAuthenticatedError } from "./api/classes/statusErrors";
+import { extractBearerToken } from "./auth";
 
-// describe("Password Hashing", () => {
-//   const password1 = "correctPassword123!";
-//   const password2 = "anotherPassword456!";
-//   let hash1: string;
-//   let hash2: string;
+describe("Password Hashing", () => {
+  const password1 = "correctPassword123!";
+  const password2 = "anotherPassword456!";
+  let hash1: string;
+  let hash2: string;
 
-//   beforeAll(async () => {
-//     hash1 = await hashPassword(password1);
-//     hash2 = await hashPassword(password2);
-//   });
+  beforeAll(async () => {
+    hash1 = await hashPassword(password1);
+    hash2 = await hashPassword(password2);
+  });
 
-//   it("should return true for the correct password", async () => {
-//     const result = await checkPasswordHash(password1, hash1);
-//     expect(result).toBe(true);
-//   });
-// });
+  it("should return true for the correct password", async () => {
+    const result = await checkPasswordHash(password1, hash1);
+    expect(result).toBe(true);
+  });
+});
 
 describe("JWT verification", () => {
     const secret = 'shhhh';
@@ -45,33 +45,31 @@ describe("JWT verification", () => {
     })
 });
 
-describe('Bearer Token', () => {
-    const secret = config.secret;
-    let token: string | undefined;
-    let wrongToken: string | undefined;;
-    const stub = {
-        getBearerToken: (name: string | undefined) => {
-            if (name === 'Authorization') {
-                const length = 'Bearer'.length + 1;
-                const value = 'Bearer sdfds82h';
-                const key = value.slice(length)
-                return key;
-            }
-
-            return undefined;
-        }
-    }
-
-    beforeAll(async () => {
-        token = stub.getBearerToken('Authorization');
-        wrongToken = stub.getBearerToken('Farty')
+describe('Extract Bearer Token', () => {
+    it('should extract the token from a valid header', () => {
+        const token = 'a1b2c3';
+        const header = `Bearer ${token}`;
+        expect(extractBearerToken(header)).toBe(token);
     })
 
-    it('should return the bearer token', () => {
-        expect(token).toBe('sdfds82h')
+    it('should extract the token even if there are extra parts', () => {
+        const token = 'a1b2c3';
+        const header = `Bearer ${token} this is some extra stuff`;
+        expect(extractBearerToken(header)).toBe(token);
     })
 
-    it('should return undefined if no Authorization header is present on http request', () => {
-        expect(wrongToken).toBe(undefined)
+    it("should throw a BadRequestError if the header does not contain at least two parts", () => {
+        const header = 'Bearer';
+        expect(() => extractBearerToken(header)).toThrow(BadRequestError)
     })
+
+    it('should throw a BadRequestError if the header does not start with "Bearer"', () => {
+        const header = 'Butterfinger mySecretKey';
+        expect(() => extractBearerToken(header)).toThrow(BadRequestError)
+    })
+
+    it("should throw a BadRequestError if the header is an empty string", () => {
+        const header = "";
+        expect(() => extractBearerToken(header)).toThrow(BadRequestError);
+    });
 })

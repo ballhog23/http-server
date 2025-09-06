@@ -8,7 +8,7 @@ import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
 import { handlerChirps } from './api/chirps.js';
-import { handlerGetAllChirps, handlerGetSingleChirp } from './api/getChirps.js';
+import { handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
 import { userHandler } from './api/users.js';
 import { loginHandler } from './api/auth.js';

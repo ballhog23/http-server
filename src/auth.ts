@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
-import { JwtPayload } from "jsonwebtoken";
 import jwt from 'jsonwebtoken';
-import { UserNotAuthenticatedError } from "./api/classes/statusErrors.js";
+import type { JwtPayload } from "jsonwebtoken";
+import { BadRequestError, UserNotAuthenticatedError } from "./api/classes/statusErrors.js";
+import { Request } from "express";
 
 const TOKEN_ISSUER = 'chirpy';
 
@@ -29,7 +30,7 @@ export function makeJWT(userID: string, expiresIn: number, secret: string): stri
         secret,
         { algorithm: 'HS256' }
     );
-    
+
     return token;
 }
 
@@ -41,10 +42,30 @@ export function validateJWT(tokenString: string, secret: string) {
     } catch (err) {
         throw new UserNotAuthenticatedError('Invalid Token');
     }
-    
+
     if (decoded.iss !== TOKEN_ISSUER) throw new UserNotAuthenticatedError('Invalid Issuer');
 
     if (!decoded.sub) throw new UserNotAuthenticatedError('No user ID in token')
 
     return decoded.sub;
+}
+
+export function getBearerToken(req: Request) {
+    const authHeader = req.get('Authorization');
+
+    if (!authHeader) {
+        throw new BadRequestError("malformed authorization header")
+    }
+
+    return extractBearerToken(authHeader);
+}
+
+export function extractBearerToken(header: string) {
+    const splitAuth = header.split(' ');
+
+    if (splitAuth.length < 2 || splitAuth[0] !== 'Bearer') {
+        throw new BadRequestError('malformed authorization header')
+    }
+
+    return splitAuth[1];
 }

@@ -1,45 +1,25 @@
 import type { Request, Response } from 'express';
 import { createChirp } from '../db/queries/chirps.js';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, UserNotAuthenticatedError } from './classes/statusErrors.js';
-import { getBearerToken } from './auth.js';
+import { BadRequestError, UserNotAuthenticatedError, NotFoundError } from './classes/statusErrors.js';
+import { getBearerToken } from '../auth.js';
 import { validateJWT } from '../auth.js';
+import { getAllChirps, getSingleChirp } from '../db/queries/chirps.js'
 import { config } from '../config.js';
 
 export const handlerChirps = async (req: Request, res: Response) => {
-    const bearerToken = await getBearerToken(req);
-
-    if (!bearerToken) throw new BadRequestError('no authorization header');
-
-    const validateJwt = validateJWT(bearerToken, config.secret);
-
-    if (!validateJwt) throw new UserNotAuthenticatedError('not authorized');
-    
     type Parameters = {
         body: string;
     }
 
     const params: Parameters = req.body;
-
-    if (!params.body) {
-        throw new BadRequestError('data does not contain user info or req body')
-    }
+    const bearerToken = getBearerToken(req);
+    const userId = validateJWT(bearerToken, config.jwt.secret);
 
     const cleanedBody = validateChirp(params.body);
-    const chirp = await createChirp({ body: cleanedBody, userId: validateJwt });
+    const chirp = await createChirp({ body: cleanedBody, userId: userId });
 
-    if (!chirp) throw new Error('Something went wrong creating chirp');
-
-    const { body, id, createdAt, updatedAt, userId } = chirp;
-
-    respondWithJSON(res, 201, {
-        id: id,
-        createdAt: createdAt,
-        updatedAt: updatedAt,
-        body: body,
-        userId: userId
-    })
-
+    respondWithJSON(res, 201, chirp)
 }
 
 function validateChirp(body: string) {
@@ -67,4 +47,18 @@ function getCleanedBody(body: string, filterWords: string[]) {
 
     const cleanedBody = words.join(' ');
     return cleanedBody;
+}
+
+export async function handlerGetAllChirps(_: Request, res: Response) {
+    const allChirps = await getAllChirps();
+    respondWithJSON(res, 200, allChirps)
+}
+
+export async function handlerGetSingleChirp(req: Request, res: Response) {
+    const { chirpID } = req.params;
+    const chirp = await getSingleChirp(chirpID)
+
+    if (!chirp) throw new NotFoundError(`Chirp with id: ${chirpID} was not found`)
+
+    respondWithJSON(res, 200, chirp)
 }
