@@ -1,4 +1,10 @@
 import bcrypt from "bcrypt";
+import { JwtPayload } from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+import type { JsonWebTokenError } from "jsonwebtoken";
+import { UserNotAuthenticatedError } from "./api/classes/statusErrors";
+
+const TOKEN_ISSUER = 'chirpy';
 
 export async function hashPassword(password: string) {
     const saltRounds = 10;
@@ -7,4 +13,39 @@ export async function hashPassword(password: string) {
 
 export async function checkPasswordHash(password: string, hash: string) {
     return bcrypt.compare(password, hash);
+}
+
+type Payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
+
+export function makeJWT(userID: string, expiresIn: number, secret: string): string {
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const expiresAt = issuedAt + expiresIn;
+
+    const token = jwt.sign({
+        iss: TOKEN_ISSUER,
+        sub: userID,
+        iat: issuedAt,
+        exp: expiresAt
+    } satisfies Payload,
+        secret,
+        { algorithm: 'HS256' }
+    );
+    
+    return token;
+}
+
+export function validateJWT(tokenString: string, secret: string) {
+    let decoded: Payload;
+
+    try {
+        decoded = jwt.verify(tokenString, secret) as JwtPayload;
+    } catch (err) {
+        throw new UserNotAuthenticatedError('Invalid Token');
+    }
+    
+    if (decoded.iss !== TOKEN_ISSUER) throw new UserNotAuthenticatedError('Invalid Issuer');
+
+    if (!decoded.sub) throw new UserNotAuthenticatedError('No user ID in token')
+
+    return decoded.sub;
 }
