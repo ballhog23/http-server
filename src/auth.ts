@@ -65,7 +65,7 @@ export function extractBearerToken(header: string) {
     const splitAuth = header.split(' ');
 
     if (splitAuth.length < 2 || splitAuth[0] !== 'Bearer') {
-        throw new UserNotAuthenticatedError('malformed authorization header')
+        throw new BadRequestError('malformed authorization header')
     }
 
     return splitAuth[1];
