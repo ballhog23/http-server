@@ -22,6 +22,27 @@
       "when": 1757055705024,
       "tag": "0002_uneven_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1757396144831,
+      "tag": "0003_abnormal_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1757399595674,
+      "tag": "0004_short_sunfire",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1757402764548,
+      "tag": "0005_same_rocket_racer",
+      "breakpoints": true
     }
   ]
 }

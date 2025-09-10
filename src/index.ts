@@ -11,7 +11,7 @@ import { handlerChirps } from './api/chirps.js';
 import { handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
 import { userHandler } from './api/users.js';
-import { loginHandler } from './api/auth.js';
+import { loginHandler, refreshHandler, revokeHandler } from './api/auth.js';
 import { config } from './config.js';
 
 process.loadEnvFile();
@@ -49,6 +49,14 @@ app.post('/api/users', (req, res, next) => {
 
 app.post('/api/login', (req, res, next) => {
     Promise.resolve(loginHandler(req, res)).catch(next)
+})
+
+app.post('/api/refresh', (req, res, next) => {
+    Promise.resolve(refreshHandler(req, res)).catch(next)
+})
+
+app.post('/api/revoke', (req, res, next) => {
+    Promise.resolve(revokeHandler(req, res)).catch(next)
 })
 
 app.get('/admin/metrics', (req, res, next) => {
