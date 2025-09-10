@@ -10,7 +10,7 @@ import { metricsHandler } from './api/metrics.js';
 import { handlerChirps } from './api/chirps.js';
 import { handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
-import { userHandler } from './api/users.js';
+import { userHandler, updateEmailAndPasswordHandler } from './api/users.js';
 import { loginHandler, refreshHandler, revokeHandler } from './api/auth.js';
 import { config } from './config.js';
 
@@ -45,6 +45,10 @@ app.get('/api/chirps/:chirpID', (req, res, next) => {
 
 app.post('/api/users', (req, res, next) => {
     Promise.resolve(userHandler(req, res)).catch(next)
+})
+
+app.put('/api/users', (req, res, next) => {
+    Promise.resolve(updateEmailAndPasswordHandler(req, res)).catch(next)
 })
 
 app.post('/api/login', (req, res, next) => {
