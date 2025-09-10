@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import { randomBytes } from "node:crypto";
+import crypto from "crypto";
 import type { JwtPayload } from "jsonwebtoken";
 import { BadRequestError, UserNotAuthenticatedError } from "./api/classes/statusErrors.js";
 import { Request } from "express";
@@ -72,5 +72,5 @@ export function extractBearerToken(header: string) {
 }
 
 export function makeRefreshToken() {
-    return randomBytes(256).toString('hex');
+    return crypto.randomBytes(32).toString('hex');
 }

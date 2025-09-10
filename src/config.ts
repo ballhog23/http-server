@@ -28,6 +28,7 @@ type APIConfig = {
 
 type JWTConfig = {
     defaultDuration: number,
+    refreshDuration: number,
     secret: string,
     issuer: string,
 }
@@ -48,6 +49,7 @@ export const config: Config = {
     },
     jwt: {
         defaultDuration: 3600, // 1 hour
+        refreshDuration: 60 * 60 * 24 * 60 * 1000, // 60 days in ms
         secret: envOrThrow('SECRET'),
         issuer: 'chirpy'
     }

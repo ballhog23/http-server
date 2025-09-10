@@ -1,19 +1,15 @@
 import { Response, Request } from "express";
-import { BadRequestError, UserNotAuthenticatedError } from "./classes/statusErrors.js";
-import { respondWithError, respondWithJSON } from "./json.js";
+import { UserNotAuthenticatedError } from "./classes/statusErrors.js";
+import { respondWithJSON } from "./json.js";
 import { checkPasswordHash, getBearerToken, makeJWT, makeRefreshToken } from "../auth.js";
 import { getUserByEmail } from "../db/queries/users.js";
-import { getUserByRefreshToken, insertUserRefreshToken, revokeUserRefreshToken } from '../db/queries/refreshTokens.js';
+import { userForRefreshToken, saveUserRefreshToken, revokeUserRefreshToken } from '../db/queries/refresh.js';
 import type { UserResponse } from '../api/users.js';
 import { config } from '../config.js';
 
 export type LoginResponse = UserResponse & {
     token: string;
     refreshToken: string;
-}
-
-export type TokenResponse = {
-    token: string;
 }
 
 export async function loginHandler(req: Request, res: Response) {
@@ -34,8 +30,9 @@ export async function loginHandler(req: Request, res: Response) {
 
     const accessToken = makeJWT(user.id, config.jwt.defaultDuration, config.jwt.secret);
     const refreshToken = makeRefreshToken();
-    insertUserRefreshToken({ token: refreshToken, userId: user.id });
+    const saved = await saveUserRefreshToken(user.id, refreshToken);
 
+    if (!saved) throw new UserNotAuthenticatedError('could not save refresh token');
 
     respondWithJSON(res, 200, {
         id: user.id,
@@ -48,17 +45,17 @@ export async function loginHandler(req: Request, res: Response) {
 }
 
 export async function refreshHandler(req: Request, res: Response) {
-    const refreshToken = getBearerToken(req);
-    const user = await getUserByRefreshToken(refreshToken);
-    const now = new Date();
-    console.log('queried user by refresh token:\n',user)
+    let refreshToken = getBearerToken(req);
 
-    if (user.revokedAt !== null || now > user.expiresAt) {
-        respondWithError(res, 401, 'not authenticated');
-        return;
+    const result = await userForRefreshToken(refreshToken);
+    if (!result) throw new UserNotAuthenticatedError('invalid refresh token');
+
+    const user = result.user;
+    const accessToken = makeJWT(user.id, config.jwt.defaultDuration, config.jwt.secret);
+
+    type TokenResponse = {
+        token: string;
     }
-
-    const accessToken = makeJWT(user.userId, config.jwt.defaultDuration, config.jwt.secret);
 
     respondWithJSON(res, 200, { token: accessToken } satisfies TokenResponse);
 }
@@ -66,5 +63,5 @@ export async function refreshHandler(req: Request, res: Response) {
 export async function revokeHandler(req: Request, res: Response) {
     const refreshToken = getBearerToken(req);
     await revokeUserRefreshToken(refreshToken);
-    respondWithJSON(res, 204, null)
+    res.status(204).send();
 }
