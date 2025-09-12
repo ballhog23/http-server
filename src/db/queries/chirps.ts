@@ -30,7 +30,7 @@ export async function deleteSingleChirp(chirpId: string) {
         .where(eq(chirps.id, chirpId))
         .returning()
 
-    return rows[0];
+    return rows.length > 0;
 }
 
 // export async function deleteAllChirps() {

@@ -22,22 +22,25 @@ export async function handlerChirps(req: Request, res: Response) {
 }
 
 export async function handlerDeleteChirp(req: Request, res: Response) {
-    const params = req.params;
-    const { chirpID } = params;
+    const { chirpId } = req.params;
     const token = getBearerToken(req);
     const userId = validateJWT(token, config.jwt.secret);
-    const theChirp = await getSingleChirp(chirpID);
+    const theChirp = await getSingleChirp(chirpId);
+
     if (!theChirp) {
         throw new NotFoundError('chirp not found')
     }
 
     const userAuthorized = theChirp.userId === userId;
-
     if (!userAuthorized) {
-        throw new UserForbiddenError('forbidden')
+        throw new UserForbiddenError("You can't delete this chirp");
     }
 
-    await deleteSingleChirp(chirpID);
+    const deleted = await deleteSingleChirp(chirpId);
+    if (!deleted) {
+        throw new Error(`Failed to delete chirp with chirpId: ${chirpId}`);
+    }
+
     res.status(204).send()
 }
 
@@ -74,10 +77,10 @@ export async function handlerGetAllChirps(_: Request, res: Response) {
 }
 
 export async function handlerGetSingleChirp(req: Request, res: Response) {
-    const { chirpID } = req.params;
-    const chirp = await getSingleChirp(chirpID)
+    const { chirpId } = req.params;
+    const chirp = await getSingleChirp(chirpId)
 
-    if (!chirp) throw new NotFoundError(`Chirp with id: ${chirpID} was not found`)
+    if (!chirp) throw new NotFoundError(`Chirp with id: ${chirpId} was not found`)
 
     respondWithJSON(res, 200, chirp)
 }

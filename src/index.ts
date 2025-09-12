@@ -39,11 +39,11 @@ app.get('/api/chirps', (req, res, next) => {
     Promise.resolve(handlerGetAllChirps(req, res)).catch(next)
 })
 
-app.get('/api/chirps/:chirpID', (req, res, next) => {
+app.get('/api/chirps/:chirpId', (req, res, next) => {
     Promise.resolve(handlerGetSingleChirp(req, res)).catch(next)
 })
 
-app.delete('/api/chirps/:chirpID', (req, res, next) => {
+app.delete('/api/chirps/:chirpId', (req, res, next) => {
     Promise.resolve(handlerDeleteChirp(req, res)).catch(next)
 })
 
