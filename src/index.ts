@@ -7,7 +7,7 @@ import { middlewareFileServerHits } from './api/middlewareFileServerHits.js';
 import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
-import { handlerChirps } from './api/chirps.js';
+import { handlerChirps, handlerDeleteChirp } from './api/chirps.js';
 import { handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
 import { userHandler, updateEmailAndPasswordHandler } from './api/users.js';
@@ -41,6 +41,10 @@ app.get('/api/chirps', (req, res, next) => {
 
 app.get('/api/chirps/:chirpID', (req, res, next) => {
     Promise.resolve(handlerGetSingleChirp(req, res)).catch(next)
+})
+
+app.delete('/api/chirps/:chirpID', (req, res, next) => {
+    Promise.resolve(handlerDeleteChirp(req, res)).catch(next)
 })
 
 app.post('/api/users', (req, res, next) => {

@@ -1,13 +1,12 @@
 import type { Request, Response } from 'express';
-import { createChirp } from '../db/queries/chirps.js';
+import { createChirp, deleteSingleChirp } from '../db/queries/chirps.js';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, UserNotAuthenticatedError, NotFoundError } from './classes/statusErrors.js';
-import { getBearerToken } from '../auth.js';
-import { validateJWT } from '../auth.js';
+import { BadRequestError, UserNotAuthenticatedError, NotFoundError, UserForbiddenError } from './classes/statusErrors.js';
+import { getBearerToken, validateJWT } from '../auth.js';
 import { getAllChirps, getSingleChirp } from '../db/queries/chirps.js'
 import { config } from '../config.js';
 
-export const handlerChirps = async (req: Request, res: Response) => {
+export async function handlerChirps(req: Request, res: Response) {
     type Parameters = {
         body: string;
     }
@@ -20,6 +19,26 @@ export const handlerChirps = async (req: Request, res: Response) => {
     const chirp = await createChirp({ body: cleanedBody, userId: userId });
 
     respondWithJSON(res, 201, chirp)
+}
+
+export async function handlerDeleteChirp(req: Request, res: Response) {
+    const params = req.params;
+    const { chirpID } = params;
+    const token = getBearerToken(req);
+    const userId = validateJWT(token, config.jwt.secret);
+    const theChirp = await getSingleChirp(chirpID);
+    if (!theChirp) {
+        throw new NotFoundError('chirp not found')
+    }
+
+    const userAuthorized = theChirp.userId === userId;
+
+    if (!userAuthorized) {
+        throw new UserForbiddenError('forbidden')
+    }
+
+    await deleteSingleChirp(chirpID);
+    res.status(204).send()
 }
 
 function validateChirp(body: string) {
