@@ -7,10 +7,9 @@ import { middlewareFileServerHits } from './api/middlewareFileServerHits.js';
 import { errorHandler } from './api/middlewareErrorHandler.js';
 import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
-import { handlerChirps, handlerDeleteChirp } from './api/chirps.js';
-import { handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
+import { handlerChirps, handlerDeleteChirp, handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
-import { userHandler, updateEmailAndPasswordHandler } from './api/users.js';
+import { userHandler, updateEmailAndPasswordHandler, upgradeToChirpyRedHandler } from './api/users.js';
 import { loginHandler, refreshHandler, revokeHandler } from './api/auth.js';
 import { config } from './config.js';
 
@@ -65,6 +64,10 @@ app.post('/api/refresh', (req, res, next) => {
 
 app.post('/api/revoke', (req, res, next) => {
     Promise.resolve(revokeHandler(req, res)).catch(next)
+})
+
+app.post('/api/polka/webhooks', (req, res, next) => {
+    Promise.resolve(upgradeToChirpyRedHandler(req, res)).catch(next)
 })
 
 app.get('/admin/metrics', (req, res, next) => {

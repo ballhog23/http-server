@@ -38,3 +38,13 @@ export async function updateUserEmailAndPassword(user: NewUser) {
 
     return result;
 }
+
+export async function upgradeUserToPremium(userId: string) {
+    const [result] = await db
+        .update(users)
+        .set({ isChirpyRed: true })
+        .where(eq(users.id, userId))
+        .returning({id: users.id})
+
+    return result;
+}

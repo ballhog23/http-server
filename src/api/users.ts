@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { createUser, getUserById, updateUserEmailAndPassword } from "../db/queries/users.js";
-import { BadRequestError, UserNotAuthenticatedError } from "./classes/statusErrors.js";
+import { createUser, getUserById, updateUserEmailAndPassword, upgradeUserToPremium } from "../db/queries/users.js";
+import { BadRequestError, NotFoundError, UserNotAuthenticatedError } from "./classes/statusErrors.js";
 import { respondWithJSON } from "./json.js";
 import { getBearerToken, hashPassword, validateJWT } from "../auth.js";
 import type { NewUser } from "../db/schema.js";
@@ -27,9 +27,15 @@ export async function userHandler(req: Request, res: Response) {
 
     if (!user) throw new Error('Unable to create user');
 
-    const { id, createdAt, updatedAt, email } = user;
+    const { id, createdAt, updatedAt, email, isChirpyRed } = user;
 
-    const userResponse: UserResponse = { id: id, createdAt: createdAt, updatedAt: updatedAt, email: email };
+    const userResponse = {
+        id: id,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        email: email,
+        isChirpyRed: isChirpyRed,
+    } satisfies UserResponse;
 
     respondWithJSON(res, 201, userResponse)
 }
@@ -48,8 +54,6 @@ export async function updateEmailAndPasswordHandler(req: Request, res: Response)
 
     const userId = validateJWT(accessToken, config.jwt.secret);
 
-    console.log(userId)
-
     if (!userId) throw new UserNotAuthenticatedError('not authorized');
 
     const hashedPassword = await hashPassword(params.password);
@@ -61,6 +65,36 @@ export async function updateEmailAndPasswordHandler(req: Request, res: Response)
 
     // update user
     const updatedUser = await updateUserEmailAndPassword(user);
-    
+
     respondWithJSON(res, 200, updatedUser satisfies UserResponse)
+}
+
+export async function upgradeToChirpyRedHandler(req: Request, res: Response) {
+    type Parameters = {
+        event: string,
+        data: {
+            userId: string,
+        },
+    };
+
+    // const accessToken = getBearerToken(req);
+    // const userId = validateJWT(accessToken, config.jwt.secret);
+
+    // if (!userId) throw new UserNotAuthenticatedError('invalid token');
+
+    const params: Parameters = req.body;
+
+    if (params.event !== "user.upgraded") {
+        res.status(204).send();
+    }
+
+    if (params.event === 'user.upgraded') {
+        const user = await upgradeUserToPremium(params.data.userId)
+
+        if (!user) {
+            throw new NotFoundError('user not found');
+        }
+
+        res.status(204).send();
+    }
 }
