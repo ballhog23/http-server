@@ -9,8 +9,9 @@ import { handlerReadiness } from './api/readiness.js';
 import { metricsHandler } from './api/metrics.js';
 import { handlerChirps, handlerDeleteChirp, handlerGetAllChirps, handlerGetSingleChirp } from './api/chirps.js';
 import { resetHandler } from './api/reset.js';
-import { userHandler, updateEmailAndPasswordHandler, upgradeToChirpyRedHandler } from './api/users.js';
+import { userHandler, handlerUsersUpdate } from './api/users.js';
 import { loginHandler, refreshHandler, revokeHandler } from './api/auth.js';
+import { handlerWebhook } from './api/webhooks.js';
 import { config } from './config.js';
 
 process.loadEnvFile();
@@ -51,7 +52,7 @@ app.post('/api/users', (req, res, next) => {
 })
 
 app.put('/api/users', (req, res, next) => {
-    Promise.resolve(updateEmailAndPasswordHandler(req, res)).catch(next)
+    Promise.resolve(handlerUsersUpdate(req, res)).catch(next)
 })
 
 app.post('/api/login', (req, res, next) => {
@@ -67,7 +68,7 @@ app.post('/api/revoke', (req, res, next) => {
 })
 
 app.post('/api/polka/webhooks', (req, res, next) => {
-    Promise.resolve(upgradeToChirpyRedHandler(req, res)).catch(next)
+    Promise.resolve(handlerWebhook(req, res)).catch(next)
 })
 
 app.get('/admin/metrics', (req, res, next) => {

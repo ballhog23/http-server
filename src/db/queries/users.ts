@@ -30,21 +30,25 @@ export async function getUserById(userId: string) {
     return user;
 }
 
-export async function updateUserEmailAndPassword(user: NewUser) {
+export async function updateUserEmailAndPassword(id: string, email: string, hashedPassword: string) {
     const [result] = await db
         .update(users)
-        .set({ email: user.email, hashedPassword: user.hashedPassword })
-        .returning({ id: users.id, email: users.email, createdAt: users.createdAt, updatedAt: users.updatedAt });
+        .set({
+            email: email,
+            hashedPassword: hashedPassword,
+        })
+        .where(eq(users.id, id))
+        .returning();
 
     return result;
 }
 
-export async function upgradeUserToPremium(userId: string) {
+export async function upgradeChirpyRed(userId: string) {
     const [result] = await db
         .update(users)
         .set({ isChirpyRed: true })
         .where(eq(users.id, userId))
-        .returning({id: users.id})
+        .returning()
 
     return result;
 }

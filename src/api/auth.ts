@@ -39,9 +39,9 @@ export async function loginHandler(req: Request, res: Response) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         email: user.email,
+        isChirpyRed: user.isChirpyRed,
         token: accessToken,
         refreshToken: refreshToken,
-        isChirpyRed: user.isChirpyRed
     } satisfies LoginResponse)
 }
 

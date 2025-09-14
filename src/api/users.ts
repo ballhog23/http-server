@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { createUser, getUserById, updateUserEmailAndPassword, upgradeUserToPremium } from "../db/queries/users.js";
-import { BadRequestError, NotFoundError, UserNotAuthenticatedError } from "./classes/statusErrors.js";
+import { createUser, updateUserEmailAndPassword } from "../db/queries/users.js";
+import { BadRequestError, UserNotAuthenticatedError } from "./classes/statusErrors.js";
 import { respondWithJSON } from "./json.js";
 import { getBearerToken, hashPassword, validateJWT } from "../auth.js";
 import type { NewUser } from "../db/schema.js";
@@ -40,61 +40,31 @@ export async function userHandler(req: Request, res: Response) {
     respondWithJSON(res, 201, userResponse)
 }
 
-export async function updateEmailAndPasswordHandler(req: Request, res: Response) {
+export async function handlerUsersUpdate(req: Request, res: Response) {
     type Parameters = {
         email: string;
         password: string;
     };
 
     const accessToken = getBearerToken(req);
+    const userId = validateJWT(accessToken, config.jwt.secret);
 
     const params: Parameters = req.body;
 
     if (!params.email || !params.password) throw new BadRequestError('Missing required fields');
 
-    const userId = validateJWT(accessToken, config.jwt.secret);
-
     if (!userId) throw new UserNotAuthenticatedError('not authorized');
 
-    const hashedPassword = await hashPassword(params.password);
-    const updatedEmail = params.email;
-    // get user from id
-    const user = await getUserById(userId);
-    user.hashedPassword = hashedPassword;
-    user.email = updatedEmail;
-
     // update user
-    const updatedUser = await updateUserEmailAndPassword(user);
+    const hashedPassword = await hashPassword(params.password);
+    const updatedEmail = params.email
+    const user = await updateUserEmailAndPassword(userId, updatedEmail, hashedPassword);
 
-    respondWithJSON(res, 200, updatedUser satisfies UserResponse)
-}
-
-export async function upgradeToChirpyRedHandler(req: Request, res: Response) {
-    type Parameters = {
-        event: string,
-        data: {
-            userId: string,
-        },
-    };
-
-    // const accessToken = getBearerToken(req);
-    // const userId = validateJWT(accessToken, config.jwt.secret);
-
-    // if (!userId) throw new UserNotAuthenticatedError('invalid token');
-
-    const params: Parameters = req.body;
-
-    if (params.event !== "user.upgraded") {
-        res.status(204).send();
-    }
-
-    if (params.event === 'user.upgraded') {
-        const user = await upgradeUserToPremium(params.data.userId)
-
-        if (!user) {
-            throw new NotFoundError('user not found');
-        }
-
-        res.status(204).send();
-    }
+    respondWithJSON(res, 200, {
+        id: user.id,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        email: user.email,
+        isChirpyRed: user.isChirpyRed,
+    } satisfies UserResponse)
 }
