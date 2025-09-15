@@ -5,10 +5,7 @@ import { BadRequestError, NotFoundError, UserForbiddenError } from './classes/st
 import { getBearerToken, validateJWT } from '../auth.js';
 import { getAllChirps, getSingleChirp, getAllChirpsByAuthor } from '../db/queries/chirps.js'
 import { config } from '../config.js';
-import { NewChirp } from 'src/db/schema.js';
-import { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
-
-export type Chirp = & NewChirp;
+import { Chirp } from '../db/schema.js';
 
 export async function handlerChirps(req: Request, res: Response) {
     type Parameters = {
@@ -52,7 +49,7 @@ export async function handlerGetAllChirps(req: Request, res: Response) {
     const queryAuthorId = req.query?.authorId;
     const authorId = typeof queryAuthorId === 'string' ? queryAuthorId : undefined;
     const querySort = req.query?.sort;
-    const sortBy = typeof querySort === 'string' ? querySort : undefined;
+    const sortBy = querySort === "desc" ? "desc" : "asc";
 
     if (!authorId) {
         const allChirps = await getAllChirps();
@@ -100,10 +97,12 @@ function getCleanedBody(body: string, filterWords: string[]) {
     return cleanedBody;
 }
 
-function filterChirps(res: Response, chirps: Array<Chirp>, sortFn: string | undefined) {
-    if (sortFn === 'desc') {
-        respondWithJSON(res, 200, chirps.sort((a, b) => Number(b.createdAt) - Number(a.createdAt)));
-    } else {
-        respondWithJSON(res, 200, chirps.sort((a, b) => Number(a.createdAt) - Number(b.createdAt)));
-    }
+function filterChirps(res: Response, chirps: Array<Chirp>, sortFn: 'asc' | 'desc') {
+    chirps.sort((a, b) =>
+        sortFn === 'asc' ?
+            a.createdAt.getTime() - b.createdAt.getTime() :
+            b.createdAt.getTime() - a.createdAt.getTime()
+    );
+
+    respondWithJSON(res, 200, chirps);
 }
