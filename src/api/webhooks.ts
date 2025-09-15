@@ -11,10 +11,8 @@ export async function handlerWebhook(req: Request, res: Response) {
             userId: string,
         },
     };
-
-    type ApiKey = string;
     
-    const apiKey: ApiKey = getAPIKey(req);
+    const apiKey = getAPIKey(req);
 
     if (apiKey !== config.api.polkaKey) {
         throw new UserNotAuthenticatedError('invalid api key')
