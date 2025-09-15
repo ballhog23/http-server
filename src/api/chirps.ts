@@ -1,10 +1,11 @@
 import type { Request, Response } from 'express';
 import { createChirp, deleteSingleChirp } from '../db/queries/chirps.js';
 import { respondWithJSON } from './json.js';
-import { BadRequestError, UserNotAuthenticatedError, NotFoundError, UserForbiddenError } from './classes/statusErrors.js';
+import { BadRequestError, NotFoundError, UserForbiddenError } from './classes/statusErrors.js';
 import { getBearerToken, validateJWT } from '../auth.js';
-import { getAllChirps, getSingleChirp } from '../db/queries/chirps.js'
+import { getAllChirps, getSingleChirp, getAllChirpsByAuthor } from '../db/queries/chirps.js'
 import { config } from '../config.js';
+import { param } from 'drizzle-orm';
 
 export async function handlerChirps(req: Request, res: Response) {
     type Parameters = {
@@ -71,9 +72,23 @@ function getCleanedBody(body: string, filterWords: string[]) {
     return cleanedBody;
 }
 
-export async function handlerGetAllChirps(_: Request, res: Response) {
-    const allChirps = await getAllChirps();
-    respondWithJSON(res, 200, allChirps)
+export async function handlerGetAllChirps(req: Request, res: Response) {
+    type ReqQuery = {
+        authorId?: string,
+    }
+    
+    const query: ReqQuery = req.query;
+
+    if (!query.authorId) {
+        const allChirps = await getAllChirps();
+        respondWithJSON(res, 200, allChirps);
+
+    } else {
+        const authorId = query.authorId;
+        const allAuthorChirps = await getAllChirpsByAuthor(authorId);
+        respondWithJSON(res, 200, allAuthorChirps);
+    }
+
 }
 
 export async function handlerGetSingleChirp(req: Request, res: Response) {
