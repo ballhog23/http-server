@@ -22,10 +22,6 @@ export async function getAllChirpsByAuthor(userId: string) {
         .from(chirps)
         .where(eq(chirps.userId, userId));
 
-    if (rows.length === 0) {
-        return;
-    }
-
     return rows;
 }
 

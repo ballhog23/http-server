@@ -73,18 +73,14 @@ function getCleanedBody(body: string, filterWords: string[]) {
 }
 
 export async function handlerGetAllChirps(req: Request, res: Response) {
-    type ReqQuery = {
-        authorId?: string,
-    }
-    
-    const query: ReqQuery = req.query;
+    const query = req.query?.authorId;
+    const authorId = typeof query === 'string' ? query : undefined;
 
-    if (!query.authorId) {
+    if (!authorId) {
         const allChirps = await getAllChirps();
         respondWithJSON(res, 200, allChirps);
 
     } else {
-        const authorId = query.authorId;
         const allAuthorChirps = await getAllChirpsByAuthor(authorId);
         respondWithJSON(res, 200, allAuthorChirps);
     }
