@@ -17,5 +17,9 @@ I rolled my own authentication process with email and passwords, and JWTs. This 
   }
 }
 ```
+
+## Testing
+I used [vitest](https://vitest.dev/) to write test to test certain functions during the course of the project. An example is a function that extracts a bearer token from an Authorization header. This was also a new concept for me and I found it beneficial writing these tests as it helps you understand what your code is truly doing and knowing that potential bugs that could arise if we don't handle the cases.
+
 ## Documentation
 As for documenting this project. I have just opted to talk about this project in this readme. I plan to build a project of my own that will require documentation and practice that skill there instead of here.
