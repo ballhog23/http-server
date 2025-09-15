@@ -5,7 +5,10 @@ import { BadRequestError, NotFoundError, UserForbiddenError } from './classes/st
 import { getBearerToken, validateJWT } from '../auth.js';
 import { getAllChirps, getSingleChirp, getAllChirpsByAuthor } from '../db/queries/chirps.js'
 import { config } from '../config.js';
-import { param } from 'drizzle-orm';
+import { NewChirp } from 'src/db/schema.js';
+import { a } from 'vitest/dist/chunks/suite.d.FvehnV49.js';
+
+export type Chirp = & NewChirp;
 
 export async function handlerChirps(req: Request, res: Response) {
     type Parameters = {
@@ -45,6 +48,31 @@ export async function handlerDeleteChirp(req: Request, res: Response) {
     res.status(204).send()
 }
 
+export async function handlerGetAllChirps(req: Request, res: Response) {
+    const queryAuthorId = req.query?.authorId;
+    const authorId = typeof queryAuthorId === 'string' ? queryAuthorId : undefined;
+    const querySort = req.query?.sort;
+    const sortBy = typeof querySort === 'string' ? querySort : undefined;
+
+    if (!authorId) {
+        const allChirps = await getAllChirps();
+        filterChirps(res, allChirps, sortBy);
+
+    } else {
+        const allAuthorChirps = await getAllChirpsByAuthor(authorId);
+        filterChirps(res, allAuthorChirps, sortBy);
+    }
+}
+
+export async function handlerGetSingleChirp(req: Request, res: Response) {
+    const { chirpId } = req.params;
+    const chirp = await getSingleChirp(chirpId)
+
+    if (!chirp) throw new NotFoundError(`Chirp with id: ${chirpId} was not found`)
+
+    respondWithJSON(res, 200, chirp)
+}
+
 function validateChirp(body: string) {
     const bodyLength = body.length;
     const maxChirpLength = 140;
@@ -72,26 +100,10 @@ function getCleanedBody(body: string, filterWords: string[]) {
     return cleanedBody;
 }
 
-export async function handlerGetAllChirps(req: Request, res: Response) {
-    const query = req.query?.authorId;
-    const authorId = typeof query === 'string' ? query : undefined;
-
-    if (!authorId) {
-        const allChirps = await getAllChirps();
-        respondWithJSON(res, 200, allChirps);
-
+function filterChirps(res: Response, chirps: Array<Chirp>, sortFn: string | undefined) {
+    if (sortFn === 'desc') {
+        respondWithJSON(res, 200, chirps.sort((a, b) => Number(b.createdAt) - Number(a.createdAt)));
     } else {
-        const allAuthorChirps = await getAllChirpsByAuthor(authorId);
-        respondWithJSON(res, 200, allAuthorChirps);
+        respondWithJSON(res, 200, chirps.sort((a, b) => Number(a.createdAt) - Number(b.createdAt)));
     }
-
-}
-
-export async function handlerGetSingleChirp(req: Request, res: Response) {
-    const { chirpId } = req.params;
-    const chirp = await getSingleChirp(chirpId)
-
-    if (!chirp) throw new NotFoundError(`Chirp with id: ${chirpId} was not found`)
-
-    respondWithJSON(res, 200, chirp)
 }
